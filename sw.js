@@ -1,25 +1,23 @@
+// Service Worker Toolbox
+importScripts('public/js/lib/sw-toolbox/sw-toolbox.js');
+
 // Set a name for the current cache
 var cacheName = 'v1';
 
 // Default files to always cache
-var cacheFiles = [
+var precacheFiles = [
   '/index.html',
   '/app.css'
+];
+toolbox.precache(precacheFiles);
 
-]
+// Install and Activate events
+self.addEventListener('install', (event) => event.waitUntil(self.skipWaiting()));
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
-self.addEventListener('install', function(e) {
-    console.log('[ServiceWorker] Installed');
-
-    // e.waitUntil Delays the event until the Promise is resolved
-    e.waitUntil(
-
-      // Open the cache
-      caches.open(cacheName).then(function(cache) {
-
-        // Add all the default files to the cache
-      console.log('[ServiceWorker] Caching cacheFiles');
-      return cache.addAll(cacheFiles);
-      })
-  ); // end e.waitUntil
+// Fetch events
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request).then((response) => response || fetch(event.request))
+    );
 });
